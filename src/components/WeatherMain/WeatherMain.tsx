@@ -11,11 +11,39 @@ import { useEffect, useState } from "react";
 import WeatherDetails from "../WeatherDetails/WeatherDetails";
 import { WeatherForecast } from "../WeatherForecast/WeatherForecast";
 
+interface ForecastDay {
+  date: string;
+  day: {
+    maxtemp_c: number;
+    mintemp_c: number;
+    maxwind_kph: number;
+    avghumidity: number;
+    condition: {
+      text: string;
+      icon: string;
+    };
+  };
+}
+
+interface WeatherData {
+  location: {
+    name: string;
+  };
+  forecast: {
+    forecastday: ForecastDay[];
+  };
+}
+
 export default function WeatherMain() {
-  const [coords, setCoords] = useState({ lat: "30.0444", lon: "31.2357" }); // default Cairo
+  const [coords, setCoords] = useState<{
+    lat: string | number;
+    lon: string | number;
+  }>({
+    lat: "30.0444",
+    lon: "31.2357",
+  });
   const [search, setSearch] = useState("");
 
-  // الحصول على الموقع الحالي
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -26,14 +54,13 @@ export default function WeatherMain() {
           });
         },
         () => {
-          // لو رفض المستخدم أو حصل خطأ
           setCoords({ lat: "30.0444", lon: "31.2357" });
         }
       );
     }
   }, []);
 
-  async function fetchWeatherData() {
+  async function fetchWeatherData(): Promise<WeatherData> {
     const response = await axios.get(
       `https://api.weatherapi.com/v1/forecast.json?key=3c52797e52cc495bab4190142251908&q=${coords.lat},${coords.lon}&days=3&lang=en`
     );
@@ -45,13 +72,12 @@ export default function WeatherMain() {
     isLoading,
     isError,
     error,
-  } = useQuery({
+  } = useQuery<WeatherData, Error>({
     queryKey: ["weatherData", coords.lat, coords.lon],
     queryFn: fetchWeatherData,
     enabled: !!coords.lat && !!coords.lon,
   });
 
-  // دالة البحث عن مدينة
   async function handleSearch(e: React.FormEvent) {
     e.preventDefault();
     if (!search.trim()) return;
@@ -85,9 +111,10 @@ export default function WeatherMain() {
       </p>
     );
 
+  if (!weather) return null; // حماية إضافية
+
   return (
     <div className="flex flex-col items-center justify-center w-full px-4 py-10">
-      {/* Search Field */}
       <form
         onSubmit={handleSearch}
         className="mb-6 !mt-20 flex gap-2 w-full max-w-md justify-center"
@@ -112,7 +139,7 @@ export default function WeatherMain() {
       </h2>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 justify-items-center !mt-10 !mb-10">
-        {weather.forecast.forecastday.map((day) => (
+        {weather.forecast.forecastday.map((day: ForecastDay) => (
           <Card
             key={day.date}
             className="w-72 hover:scale-105 !p-5 transition-transform shadow-xl rounded-2xl overflow-hidden bg-gradient-to-br from-blue-50 to-blue-100 dark:from-gray-800 dark:to-gray-900"
@@ -137,14 +164,15 @@ export default function WeatherMain() {
                 {day.day.mintemp_c}°C / {day.day.maxtemp_c}°C
               </p>
               <p className="text-gray-500 dark:text-gray-400 text-sm">
-                Wind: {day.day.maxwind_kph} km/h | Humidity: {day.day.avghumidity}%
+                Wind: {day.day.maxwind_kph} km/h | Humidity:{" "}
+                {day.day.avghumidity}%
               </p>
             </CardContent>
           </Card>
         ))}
       </div>
 
-      <WeatherDetails  coords={coords} />
+      <WeatherDetails coords={coords} />
       <WeatherForecast coords={coords} />
     </div>
   );
