@@ -36,7 +36,7 @@ export default function WeatherDetails({ coords }) {
     );
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mt-10 w-full">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mt-10 !mb-10 w-full">
       <Card className="flex flex-col items-center p-4">
         <CardHeader className="flex flex-col items-center">
           <WiHumidity className="text-4xl text-blue-500" />

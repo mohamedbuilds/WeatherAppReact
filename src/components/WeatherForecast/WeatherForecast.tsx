@@ -36,8 +36,10 @@ export const WeatherForecast = ({ coords }) => {
       {weather.forecast.forecastday.map((f) => (
         <Card key={f.date} className="text-center p-4">
           <CardHeader>
-            <CardTitle className="text-gray-700 font-semibold">
-              {f.date}
+            <CardTitle className="text-gray-700 font-semibold ">
+              {new Date(f.date).toLocaleDateString("en-US", {
+                weekday: "long",
+              })}
             </CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col items-center gap-2">
