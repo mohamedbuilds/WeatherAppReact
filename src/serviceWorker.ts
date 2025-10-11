@@ -1,4 +1,4 @@
-// serviceWorker.ts
+// src/serviceWorker.ts
 const isLocalhost = Boolean(
   window.location.hostname === "localhost" ||
     window.location.hostname === "[::1]" ||
@@ -14,12 +14,9 @@ type Config = {
 
 export function register(config?: Config) {
   if ("serviceWorker" in navigator) {
-    const publicUrl = new URL(process.env.PUBLIC_URL, window.location.href);
-    if (publicUrl.origin !== window.location.origin) return;
+    const swUrl = `/service-worker.js`; // هنا استخدمنا المسار المباشر
 
     window.addEventListener("load", () => {
-      const swUrl = `${process.env.PUBLIC_URL}/service-worker.js`;
-
       if (isLocalhost) {
         // لو على localhost
         checkValidServiceWorker(swUrl, config);
@@ -41,8 +38,10 @@ function registerValidSW(swUrl: string, config?: Config) {
         installingWorker.onstatechange = () => {
           if (installingWorker.state === "installed") {
             if (navigator.serviceWorker.controller) {
+              // تم تحديث التطبيق
               config?.onUpdate?.(registration);
             } else {
+              // تم تثبيت التطبيق لأول مرة
               config?.onSuccess?.(registration);
             }
           }
